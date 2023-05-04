@@ -1,0 +1,102 @@
+General Instructions
+- Table has to created by Hibernate
+- Follow the DAO pattern for project creation. EMUtils.java file should be used to create connection. Use try-finally to close the connection
+- Create project using maven only
+- Make sure to put SQL file in the project folder & then upload the project folder on git
+- No need to create separate table for admin login, You have to use fixed credentials username: admin & password: admin
+- If any data is missing you are free to make any reasonably suitable assumption for implementation.
+- Assume that the data taken input is validated. No need to check for validity of input value.
+
+Constraints
+- Tenure of each policy is one year. Customer has to renew policy once in every year.
+- Any policy whose payment is due for more than 30 day ago must be marked as discountinued in case of non-payment. Customer cannot revive this policy but he can puchase a new one
+- A policy is going to cover an individual only i.e. each customer has to buy separate policy
+- Minimum Entry age for any policy is 18 years and maximum entry age is 60
+- Max coverage age is up to age of 70
+- The insurance company has 3 age bands 18-35, 36-50 and 51-70 onwards
+- At the time of renewal the age of user will be counted on the next day of expiration of policy and premium will be calculated on this age. Coverage will also be counted from the next to expiration day of policy.
+
+::Operations on User side::
+Register an account
+Login
+Change Password
+Show Plans
+Calculate Policy Premium
+Purchase a new Policy
+View Purchased Policy along with payment history 
+Renew policy
+Logout
+Delete Account
+
+::Operations on Admin side::
+Add Insurance Company
+View All Insurance Companies
+Update Insurance Company Details
+Add Insurance Plan
+View All Insurance Plan
+Update Insurance Plan
+Update premium for an age band of a plan
+Make Policies Discountinued
+See List of all Customers (Do not show password)
+View policy report
+
+<!-- Student Work Starts Here --->
+Relationships
+- A company can have multiple insurance plan but an insurance plan belong to one company only
+- One insurance policy can have multiple age band and a single age band may belong to many insurance policy;
+- A customers can purchase multiple policies but a single policy can be purchased by multiple customers.
+- One policy purchase may have multple premium payment (because payment is made annually) but one payment premium entry belong to one table
+- One customer can place multiple policy orders but one order belong to one customer only.
+
++-+-+-+-+-+-+-+-
++ Project Data +
++-+-+-+-+-+-+-+-
+Customer Table:
+id int auto_increment primary key
+name varchar(50) NOT NULL
+username varchar(50) UNIQUE NOT NULL
+password varchar(50) NOT NULL
+date_of_birth DATE NOT NULL
+has_medical_condition INT NOT NULL	//If it has value 0 means no medical condition; 1 means has some medical condition
+is_deactivated INT NOT NULL	//if it is zero means account is activate, 1 means deactivated
+
+Company Table:
+id int auto_increment primary key
+company_name varchar(50) UNIQUE NOT NULL
+estd_year INT NOT NULL
+sector_type varchar(10) NOT NULL (Can have value public or private)
+
+Plan Table:
+id int auto_increment primary key
+company_id INT FOREIGN KEY
+plan_name VARCHAR(50) NOT NULL
+plan_type VARCHAR(10) NOT NULL (Can have value Term, Health)
+gst_rate double NOT NULL
+max_coverage_age int
+
+age_band (This contains payment for 3 age band 18-35, 36-50, 51-70 onwards)
+id int auto_increment primary key
+start_age int NOT NULL
+end_age int NOT NULL
+
+age_band_wise_premium_for_plan
+plan_id INT FOREIGN KEY
+age_band_id INT FOREIGN KEY
+premium_amount double
+surcharge_amount	//additional amount applied if any specific health condition
+Note: Combination of plan_id and age_band_id is primary key
+
+Order table
+id int auto_increment primary key
+customer_id INT FOREIGN KEY
+Plan_id INT FOREIGN KEY
+date_of_purchase date
+expiration_date DATE
+policy_status VARCHAR(20) NOT NULL (Can have value continued/discontinued)
+
+Premium_Payment table
+id int auto_increment primary key
+order_id int FOREIGN KEY
+amount DOUBLE
+payment_date DATE
+mode_of_payment VARCHAR(255) NOT NULL (Can have value Cash/Cheque/Online)
